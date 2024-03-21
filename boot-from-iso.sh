@@ -3,19 +3,17 @@ set -eoE pipefail
 
 usage()         {
         echo "${@}"
-        echo "Usage: $0 -t hw-type -r bmc-address -u user -p password -i http://iso-url" 1>&2;
+        echo "Usage: $0 -r bmc-address -u user -p password -i http://iso-url" 1>&2;
         exit 1;
 }
 
-if [[ $# -lt 5 ]]; then
+if [[ $# -lt 4 ]]; then
 	echo $#
         usage "Insufficient number of parameters"
 fi
 
-while getopts t:r:u:p:i: option; do
+while getopts r:u:p:i: option; do
         case "${option}" in
-                t)      
-                        HW=${OPTARG};;
                 r)
                         HOST=${OPTARG};;
                 u)
@@ -33,7 +31,6 @@ done
 shift $((OPTIND-1))
 
 
-echo HW = $HW
 echo HOST = $HOST
 echo USER = $USER
 echo PASSWORD = $PASSWORD
@@ -44,17 +41,18 @@ if ! curl --output /dev/null --silent --head --fail "$ISO_URL"; then
           usage "******* ISO does not exist in the provided url: $ISO_URL"
 fi
 
-case "${HW}" in 
-	"smc")
-		echo smcBootFromCDFull.sh $HOST $USER:$PASSWORD "$ISO_URL"
-		./smcBootFromCDFull.sh $HOST $USER:$PASSWORD "$ISO_URL"
-		;;
-	"zt")
-		echo ztBootFromCDFull.sh $HOST $USER:$PASSWORD "$ISO_URL"
-		./ztBootFromCDFull.sh $HOST $USER:$PASSWORD "$ISO_URL"
-		;;
-	*)
-                usage;;
-esac
 
 
+if curl -f -s -o /dev/null -w "%{http_code}" -ku "${USER}:${PASSWORD}" https://${HOST}/redfish/v1/Systems/Self;then
+
+	echo ztBootFromCDFull.sh $HOST $USER:$PASSWORD "$ISO_URL"
+        ./ztBootFromCDFull.sh $HOST $USER:$PASSWORD "$ISO_URL"
+
+fi
+
+if curl -f -s -o /dev/null -w "%{http_code}" -ku "${USER}:${PASSWORD}" https://${HOST}/redfish/v1/Systems/1;then
+
+	echo smcBootFromCDFull.sh $HOST $USER:$PASSWORD "$ISO_URL"
+	./smcBootFromCDFull.sh $HOST $USER:$PASSWORD "$ISO_URL"
+
+fi
