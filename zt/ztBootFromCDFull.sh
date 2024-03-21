@@ -12,5 +12,5 @@ curl --globoff  -L -w "%{http_code} %{url_effective}\\n" -ku ${USERNAME_PASSWORD
 curl --globoff  -L -w "%{http_code} %{url_effective}\\n"  -ku ${USERNAME_PASSWORD}  -H "Content-Type: application/json" -H "Accept: application/json" -d '{"Boot":{ "BootSourceOverrideEnabled": "Once", "BootSourceOverrideTarget": "Cd", "BootSourceOverrideMode": "UEFI"}}' -X PATCH https://$BMC_ADDRESS/redfish/v1/Systems/Self
 
 
-curl --globoff  -L -w "%{http_code} %{url_effective}\\n" -ku ${USERNAME_PASSWORD} -H "Content-Type: application/json" -H "Accept: application/json" -d '{"ResetType": "ForceOn"}' -X POST https://$BMC_ADDRESS/redfish/v1/Systems/Self/Actions/ComputerSystem.Reset
+curl --globoff  -L -w "%{http_code} %{url_effective}\\n" -ku ${USERNAME_PASSWORD} -H "Content-Type: application/json" -H "Accept: application/json" -d '{"ResetType": "On"}' -X POST https://$BMC_ADDRESS/redfish/v1/Systems/Self/Actions/ComputerSystem.Reset
 
